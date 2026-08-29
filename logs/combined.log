@@ -1,0 +1,5 @@
+{"level":"info","message":"GET / called","service":"Invoixe","timestamp":"2026-08-29T18:57:37.511Z"}
+{"level":"info","message":"::1 - - [29/Aug/2026:18:57:37 +0000] \"GET / HTTP/1.1\" 304 - \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.127.0 Chrome/148.0.7778.97 Electron/42.2.0 Safari/537.36\"","service":"Invoixe","timestamp":"2026-08-29T18:57:37.554Z"}
+{"level":"info","message":"GET / called","service":"Invoixe","timestamp":"2026-08-29T18:58:19.322Z"}
+{"level":"info","message":"::1 - - [29/Aug/2026:18:58:19 +0000] \"GET / HTTP/1.1\" 200 13 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36\"","service":"Invoixe","timestamp":"2026-08-29T18:58:19.349Z"}
+{"level":"info","message":"::1 - - [29/Aug/2026:18:58:19 +0000] \"GET /favicon.ico HTTP/1.1\" 404 150 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36\"","service":"Invoixe","timestamp":"2026-08-29T18:58:19.657Z"}
