@@ -1,0 +1,25 @@
+{
+  "name": "invoixe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Muhammad-Taha-404/Invoixe.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Muhammad-Taha-404/Invoixe/issues"
+  },
+  "homepage": "https://github.com/Muhammad-Taha-404/Invoixe#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
