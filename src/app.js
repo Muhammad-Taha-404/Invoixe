@@ -1,5 +1,6 @@
 import express from 'express';
 import logger from '#config/logger.js';
+import router from '#routes/auth.routes.js';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -25,5 +26,13 @@ app.get('/', (req, res) => {
   logger.debug('Request received');
   res.send('Hello, World!');
 });
+
+app.use('/api/auth', router);
+
+app.get('/health', (req, res) => {
+  logger.info('GET /health called');
+  res.status(200).json({ status: 'UP' , timestamp: new Date().toISOString(), uptime: process.uptime() });
+});
+
 
 export default app;
