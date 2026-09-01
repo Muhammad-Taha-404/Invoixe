@@ -27,7 +27,6 @@ export const payments = pgTable('payments', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
-
 export const paymentsRelations = relations(payments, ({ one, many }) => ({
   invoice: one(invoices, {
     fields: [payments.invoiceId],

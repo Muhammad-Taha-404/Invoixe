@@ -14,7 +14,6 @@ export const organizations = pgTable('organizations', {
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 });
 
-
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),
   customers: many(customers),

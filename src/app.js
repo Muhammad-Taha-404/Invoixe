@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { arcjetMiddleware } from '#middlewares/security.middleware.js';
 
 const app = express();
 app.use(helmet());
@@ -12,6 +13,8 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(arcjetMiddleware);
 
 app.use(
   morgan('combined', {
@@ -31,8 +34,13 @@ app.use('/api/auth', router);
 
 app.get('/health', (req, res) => {
   logger.info('GET /health called');
-  res.status(200).json({ status: 'UP' , timestamp: new Date().toISOString(), uptime: process.uptime() });
+  res
+    .status(200)
+    .json({
+      status: 'UP',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    });
 });
-
 
 export default app;

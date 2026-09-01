@@ -35,7 +35,6 @@ export const invoices = pgTable('invoices', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
-
 export const invoicesRelations = relations(invoices, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [invoices.organizationId],

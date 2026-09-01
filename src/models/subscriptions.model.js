@@ -28,14 +28,16 @@ export const subscriptions = pgTable('subscriptions', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
-
-export const subscriptionsRelations = relations(subscriptions, ({ one,many }) => ({
-  invoice: one(invoices, {
-    fields: [subscriptions.invoiceId],
-    references: [invoices.id],
-  }),
-  subscriptionCycles: many(subscriptionCycles, {
-    fields: [subscriptions.id],
-    references: [subscriptionCycles.subscriptionId],
-  }),
-}));
+export const subscriptionsRelations = relations(
+  subscriptions,
+  ({ one, many }) => ({
+    invoice: one(invoices, {
+      fields: [subscriptions.invoiceId],
+      references: [invoices.id],
+    }),
+    subscriptionCycles: many(subscriptionCycles, {
+      fields: [subscriptions.id],
+      references: [subscriptionCycles.subscriptionId],
+    }),
+  })
+);

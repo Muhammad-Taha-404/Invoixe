@@ -24,11 +24,13 @@ export const paymentMethods = pgTable('payment_methods', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
-
-export const paymentMethodsRelations = relations(paymentMethods, ({ one, many }) => ({
-  customer: one(customers, {
-    fields: [paymentMethods.customerId],
-    references: [customers.id],
-  }),
-  payments: many(payments),
-}));
+export const paymentMethodsRelations = relations(
+  paymentMethods,
+  ({ one, many }) => ({
+    customer: one(customers, {
+      fields: [paymentMethods.customerId],
+      references: [customers.id],
+    }),
+    payments: many(payments),
+  })
+);

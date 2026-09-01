@@ -20,7 +20,6 @@ export const taxRates = pgTable('tax_rates', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
-
 export const taxRatesRelations = relations(taxRates, ({ one }) => ({
   organization: one(organizations, {
     fields: [taxRates.organizationId],

@@ -20,10 +20,12 @@ export const subscriptionCycles = pgTable('subscription_cycles', {
   createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
 });
 
-
-export const subscriptionCyclesRelations = relations(subscriptionCycles, ({ one }) => ({
-  subscription: one(subscriptions, {
-    fields: [subscriptionCycles.subscriptionId],
-    references: [subscriptions.id],
-  }),
-}));
+export const subscriptionCyclesRelations = relations(
+  subscriptionCycles,
+  ({ one }) => ({
+    subscription: one(subscriptions, {
+      fields: [subscriptionCycles.subscriptionId],
+      references: [subscriptions.id],
+    }),
+  })
+);
