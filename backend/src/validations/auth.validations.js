@@ -10,7 +10,9 @@ export const signupSchema = z.object({
     .string()
     .min(6, 'Password must be at least 6 characters long')
     .max(50, 'Password must be less than 50 characters'),
-  role: z.enum(['user', 'admin', 'owner']).default('user'),
+  // role: z.enum(['user', 'admin'], {
+  //   errorMap: () => ({ message: 'Role must be either "user" or "admin"' }),
+  // }),
 });
 
 export const signinSchema = z.object({

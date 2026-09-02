@@ -19,7 +19,7 @@ const comparePassword = async (password, hashPassword) => {
   return await bcrypt.compare(password, hashPassword);
 };
 
-export const createUser = async ({ name, email, password, role = 'user' }) => {
+export const createUser = async ({ name, email, password, }) => {
   try {
     const existingUser = await db
       .select()
@@ -34,12 +34,11 @@ export const createUser = async ({ name, email, password, role = 'user' }) => {
     const hashedPassword = await hashPassword(password);
     const [newUser] = await db
       .insert(users)
-      .values({ name, email, password_hash: hashedPassword, role })
+      .values({ name, email, password_hash: hashedPassword })
       .returning({
         id: users.id,
         name: users.name,
         email: users.email,
-        role: users.role,
       });
     return newUser;
   } catch (error) {
@@ -96,3 +95,4 @@ export const signIn = ({ email, password }) => {
       throw new Error('Error signing in: ' + error.message);
     });
 };
+

@@ -1,4 +1,4 @@
-import { signupSchema } from '#validations/auth.validations.js';
+import { signupSchema, signinSchema } from '#validations/auth.validations.js';
 import logger from '#config/logger.js';
 import { formatValidationErrors } from '#utils/format.js';
 import { createUser, signIn } from '#services/auth.service.js';
@@ -23,13 +23,13 @@ export const signup = async (req, res, next) => {
         });
     }
 
-    const { name, email, password, role } = validatedData.data;
+    const { name, email, password } = validatedData.data;
 
-    const newUser = await createUser({ name, email, password, role });
+    const newUser = await createUser({ name, email, password });
     const token = jwtToken.sign({
       id: newUser.id,
       email: newUser.email,
-      role: newUser.role,
+      // role: newUser.role,
     });
     cookies.setCookie(res, 'token', token, {
       httpOnly: true,
@@ -38,7 +38,7 @@ export const signup = async (req, res, next) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    logger.info(`User ${email} signed up successfully with role ${role}`);
+    logger.info(`User ${email} signed up successfully`);
     res.status(201).json({
       message: 'User created successfully',
       user: {
@@ -63,12 +63,25 @@ export const signup = async (req, res, next) => {
 
 export const signin = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const validatedData = await signinSchema.safeParse(req.body);
+    if (!validatedData.success) {
+      logger.error(
+        'Validation error during signin:',
+        formatValidationErrors(validatedData.error)
+      );
+      return res
+        .status(400)
+        .json({
+          error: 'Invalid input data',
+          details: formatValidationErrors(validatedData.error),
+        });
+    }
+    const { email, password } = validatedData.data;
     const user = await signIn({ email, password });
     const token = jwtToken.sign({
       id: user.id,
       email: user.email,
-      role: user.role,
+      // role: user.role,
     });
     cookies.setCookie(res, 'token', token, {
       httpOnly: true,
@@ -109,5 +122,48 @@ export const signOut = (req, res) => {
   } catch (error) {
     logger.error('Error during signout:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+export const gitHubLogin = (req, res) => {
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  const redirectUri = process.env.GITHUB_CALLBACK_URL;
+  const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=read:user`;
+  res.redirect(githubAuthUrl);
+};
+
+export const gitHubCallback = async (req, res) => {
+  const code = req.query.code;
+  if (!code) {
+    return res.status(400).json({ error: 'Authorization code not provided' });
+  }
+  
+  const info = await fetch(`https://github.com/login/oauth/access_token?client_id=${process.env.GITHUB_CLIENT_ID}&client_secret=${process.env.GITHUB_CLIENT_SECRET}&code=${code}&redirect_uri=${process.env.GITHUB_CALLBACK_URL}`);
+  const data = await info.json();
+  if (!data.access_token) {
+    return res.status(400).json({ error: 'Failed to retrieve access token' });
+  }
+  
+};
+
+
+export const googleLogin = (req, res) => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile`;
+  res.redirect(googleAuthUrl);
+};
+
+export const googleCallback = async (req, res) => {
+  const code = req.query.code;
+  if (!code) {
+    return res.status(400).json({ error: 'Authorization code not provided' });
+  }
+  
+  const info = await fetch(`https://oauth2.googleapis.com/token?client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_SECRET}&code=${code}&redirect_uri=${process.env.GOOGLE_REDIRECT_URI}&grant_type=authorization_code`);
+  const data = await info.json();
+  if (!data.access_token) {
+    return res.status(400).json({ error: 'Failed to retrieve access token' });
   }
 };

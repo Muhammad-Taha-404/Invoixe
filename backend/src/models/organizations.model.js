@@ -1,5 +1,5 @@
 import { pgTable, uuid, varchar, timestamp } from 'drizzle-orm/pg-core';
-import { users } from './users.model.js';
+import { organizationMembers } from './users.model.js';
 import { customers } from './customers.model.js';
 import { invoices } from './invoices.model.js';
 import { taxRates } from './taxRates.model.js';
@@ -15,7 +15,7 @@ export const organizations = pgTable('organizations', {
 });
 
 export const organizationsRelations = relations(organizations, ({ many }) => ({
-  users: many(users),
+  members: many(organizationMembers),
   customers: many(customers),
   invoices: many(invoices),
   taxRates: many(taxRates),
