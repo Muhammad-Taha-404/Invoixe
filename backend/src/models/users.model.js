@@ -12,6 +12,7 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }).notNull(),
   // Made password_hash NULLABLE so OAuth users can sign up without a password
   password_hash: varchar('password_hash', { length: 255 }), 
+  image: varchar('image', { length: 255 }),
   isActive: varchar('is_active', { length: 50 }).notNull().default('true'),
   isVerified: varchar('is_verified', { length: 50 }).notNull().default('false'),
   resetPasswordToken: varchar('reset_password_token', { length: 255 }),
