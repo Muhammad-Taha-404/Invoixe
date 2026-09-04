@@ -50,6 +50,7 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.12.0",
     "node-fetch": "^3.3.2",
+    "resend": "^6.26.0",
     "winston": "^3.19.0",
     "ws": "^8.21.3",
     "zod": "^4.5.4"

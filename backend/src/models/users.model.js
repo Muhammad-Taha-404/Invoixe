@@ -1,9 +1,22 @@
-import { pgTable, uuid, varchar, text, timestamp, primaryKey, pgEnum, integer } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  uuid,
+  varchar,
+  text,
+  timestamp,
+  primaryKey,
+  pgEnum,
+  integer,
+} from 'drizzle-orm/pg-core';
 import { organizations } from './organizations.model.js';
 import { relations } from 'drizzle-orm';
 
 // --- ENUMS ---
-export const accountTypeEnum = pgEnum('account_type', ['oauth', 'oidc', 'email']);
+export const accountTypeEnum = pgEnum('account_type', [
+  'oauth',
+  'oidc',
+  'email',
+]);
 
 // --- USERS TABLE ---
 export const users = pgTable('users', {
@@ -11,7 +24,7 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }).unique().notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   // Made password_hash NULLABLE so OAuth users can sign up without a password
-  password_hash: varchar('password_hash', { length: 255 }), 
+  password_hash: varchar('password_hash', { length: 255 }),
   image: varchar('image', { length: 255 }),
   isActive: varchar('is_active', { length: 50 }).notNull().default('true'),
   isVerified: varchar('is_verified', { length: 50 }).notNull().default('false'),
@@ -24,17 +37,21 @@ export const users = pgTable('users', {
 });
 
 // --- ORGANIZATION MEMBERS TABLE ---
-export const organizationMembers = pgTable('organization_members', {
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  organizationId: uuid('organization_id')
-    .notNull()
-    .references(() => organizations.id, { onDelete: 'cascade' }),
-  role: varchar('role', { length: 50 }).notNull().default('user'),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.userId, table.organizationId] }),
-}));
+export const organizationMembers = pgTable(
+  'organization_members',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    role: varchar('role', { length: 50 }).notNull().default('user'),
+  },
+  table => ({
+    pk: primaryKey({ columns: [table.userId, table.organizationId] }),
+  })
+);
 
 // --- ACCOUNTS TABLE ---
 export const accounts = pgTable(
@@ -46,7 +63,9 @@ export const accounts = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     type: accountTypeEnum('type').notNull(),
     provider: varchar('provider', { length: 255 }).notNull(),
-    providerAccountId: varchar('provider_account_id', { length: 255 }).notNull(),
+    providerAccountId: varchar('provider_account_id', {
+      length: 255,
+    }).notNull(),
     // Changed long token fields from varchar to text to prevent truncation errors
     refreshToken: text('refresh_token'),
     accessToken: text('access_token'),
@@ -63,7 +82,7 @@ export const accounts = pgTable(
 export const sessions = pgTable('sessions', {
   id: uuid('id').defaultRandom().primaryKey(),
   // Removed .primaryKey() here since `id` above is already primaryKey
-  sessionToken: varchar('session_token', { length: 255 }).unique().notNull(), 
+  sessionToken: varchar('session_token', { length: 255 }).unique().notNull(),
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
@@ -77,16 +96,19 @@ export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
 }));
 
-export const organizationMembersRelations = relations(organizationMembers, ({ one }) => ({
-  user: one(users, {
-    fields: [organizationMembers.userId],
-    references: [users.id],
-  }),
-  organization: one(organizations, {
-    fields: [organizationMembers.organizationId],
-    references: [organizations.id],
-  }),
-}));
+export const organizationMembersRelations = relations(
+  organizationMembers,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [organizationMembers.userId],
+      references: [users.id],
+    }),
+    organization: one(organizations, {
+      fields: [organizationMembers.organizationId],
+      references: [organizations.id],
+    }),
+  })
+);
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, {

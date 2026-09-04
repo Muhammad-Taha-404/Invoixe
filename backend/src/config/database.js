@@ -1,8 +1,16 @@
 import 'dotenv/config';
+import ws from 'ws';
 
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import { neonConfig, Pool } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
 
-const sql = neon(process.env.DATABASE_URL);
-const db = drizzle(sql);
-export { db, sql };
+neonConfig.webSocketConstructor = ws;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+
+const db = drizzle(pool);
+export { db, pool };

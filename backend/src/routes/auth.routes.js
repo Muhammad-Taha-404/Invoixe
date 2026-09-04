@@ -1,9 +1,19 @@
 import express from 'express';
-import { signup, signin, signOut, gitHubLogin, gitHubCallback, googleLogin, googleCallback } from '#controllers/auth.controller.js';
+import {
+  signup,
+  signin,
+  signOut,
+  gitHubLogin,
+  gitHubCallback,
+  googleLogin,
+  googleCallback,
+  verifyEmail,
+} from '#controllers/auth.controller.js';
 
 const router = express.Router();
 
 router.post('/sign-up', signup);
+router.get('/verify-email', verifyEmail);
 
 router.post('/sign-in', signin);
 

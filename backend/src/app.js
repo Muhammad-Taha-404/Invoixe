@@ -34,13 +34,11 @@ app.use('/api/auth', router);
 
 app.get('/health', (req, res) => {
   logger.info('GET /health called');
-  res
-    .status(200)
-    .json({
-      status: 'UP',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-    });
+  res.status(200).json({
+    status: 'UP',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
 
 export default app;

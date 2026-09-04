@@ -3,6 +3,7 @@ import logger from '#config/logger.js';
 import { users } from '#models/users.model.js';
 import { db } from '#config/database.js';
 import { eq } from 'drizzle-orm';
+import crypto from 'crypto';
 
 const hashPassword = async password => {
   try {
@@ -19,7 +20,7 @@ const comparePassword = async (password, hashPassword) => {
   return await bcrypt.compare(password, hashPassword);
 };
 
-export const createUser = async ({ name, email, password, }) => {
+export const createUser = async ({ name, email, password }) => {
   try {
     const existingUser = await db
       .select()
@@ -31,15 +32,25 @@ export const createUser = async ({ name, email, password, }) => {
       throw new Error('User with this email already exists');
     }
 
+    const token = crypto.randomUUID();
+    const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
     const hashedPassword = await hashPassword(password);
     const [newUser] = await db
       .insert(users)
-      .values({ name, email, password_hash: hashedPassword })
+      .values({
+        name,
+        email,
+        password_hash: hashedPassword,
+        verificationToken: token,
+        verificationTokenExpires: tokenExpires,
+        isVerified: 'false',
+      })
       .returning({
         id: users.id,
         name: users.name,
         email: users.email,
       });
+
     return newUser;
   } catch (error) {
     logger.error('Error creating user:', error);
@@ -79,20 +90,12 @@ export const getUserById = async id => {
   }
 };
 
-export const signIn = ({ email, password }) => {
-  return getUserByEmail(email)
-    .then(user => {
-      return comparePassword(password, user.password_hash).then(isMatch => {
-        if (!isMatch) {
-          logger.error('Invalid password for user with email:', email);
-          throw new Error('Invalid password');
-        }
-        return user;
-      });
-    })
-    .catch(error => {
-      logger.error('Error signing in:', error);
-      throw new Error('Error signing in: ' + error.message);
-    });
+export const signIn = async ({ email, password }) => {
+  const user = await getUserByEmail(email);
+  const isMatch = await comparePassword(password, user.password_hash);
+  if (!isMatch) {
+    logger.error('Invalid password for user with email:', email);
+    throw new Error('Invalid password');
+  }
+  return user;
 };
-
