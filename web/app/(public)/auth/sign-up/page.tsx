@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, ShieldCheck, Eye, EyeOff, ArrowRight, CheckCircle2, TrendingUp, Zap } from 'lucide-react';
 
 export default function SignupForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -15,24 +17,22 @@ export default function SignupForm() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('Form Submitted:', formData);
     const jsonObject = JSON.stringify({ name: formData.name, email: formData.email, password: formData.password });
-    fetch('http://localhost:3000/api/auth/sign-up', {
+    const response = await fetch('http://localhost:3000/api/auth/sign-up', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: jsonObject,
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Success:', data);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+    });
+    const data = await response.json();
+    console.log('Response from server:', data);
+    if (data.redirectUrl) {
+      router.push(data.redirectUrl);
+    }
 
   };
 

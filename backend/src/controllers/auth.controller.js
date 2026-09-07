@@ -31,8 +31,10 @@ export const signup = async (req, res, next) => {
     const { name, email, password } = validatedData.data;
 
     const newUser = await createUser({ name, email, password });
-    await sendVerificationEmail(newUser.email, newUser.verificationToken);
-    if (newUser.isVerified === 'true') {
+
+    if (newUser) {
+      await sendVerificationEmail(newUser.email, newUser.verificationToken);
+
       const token = jwtToken.sign({
         id: newUser.id,
         email: newUser.email,
@@ -44,27 +46,25 @@ export const signup = async (req, res, next) => {
         sameSite: 'strict',
         maxAge: 24 * 60 * 60 * 1000,
       });
+      logger.info(`User ${email} signed up successfully`);
+      return res.status(201).json({
+        success: true,
+        message: 'Please verify your email address',
+        redirectUrl: '/auth/verify-email',
+        user: { id: newUser.id, name: newUser.name, email: newUser.email },
+      });
     } else {
-      return res.redirect('http://localhost:4000/auth/verify-email');
+      return res
+        .status(409)
+        .json({ success: false, error: 'User with this email already exists' });
     }
-
-    logger.info(`User ${email} signed up successfully`);
-    res.status(201).json({
-      message: 'User created successfully',
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-      },
-    });
   } catch (error) {
     logger.error('Error during signup:', error);
 
     if (error.name === 'User with this email already exists') {
       return res
         .status(409)
-        .json({ error: 'User with this email already exists' });
+        .json({ success: false, error: 'User with this email already exists' });
     }
 
     next(error);
@@ -125,28 +125,37 @@ export const signin = async (req, res, next) => {
     }
     const { email, password } = validatedData.data;
     const user = await signIn({ email, password });
-    const token = jwtToken.sign({
-      id: user.id,
-      email: user.email,
-      // role: user.role,
-    });
-    cookies.setCookie(res, 'token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
-    logger.info(`User ${email} signed in successfully`);
-    res.status(201).json({
-      message: 'User signed in successfully',
-      user: {
+    if (user) {
+      const token = jwtToken.sign({
         id: user.id,
-        name: user.name,
         email: user.email,
-        role: user.role,
-      },
-    });
+        isVerified: user.isVerified,
+        // role: user.role,
+      });
+      cookies.setCookie(res, 'token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+
+      logger.info(`User ${email} signed in successfully`);
+      return res.status(201).json({
+        success: true,
+        message: 'User signed in successfully',
+        redirectUrl: '/dashboard',
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          isVerified: user.isVerified,
+        },
+      });
+    } else {
+      return res
+        .status(401)
+        .json({ status: false, error: 'Invalid email or password' });
+    }
   } catch (error) {
     logger.error('Error during signin:', error);
 

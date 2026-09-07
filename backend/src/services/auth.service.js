@@ -12,7 +12,7 @@ const hashPassword = async password => {
     return hashedPassword;
   } catch (error) {
     logger.error('Error hashing password:', error);
-    throw new Error('Error hashing password: ' + error.message);
+    return null;
   }
 };
 
@@ -29,7 +29,7 @@ export const createUser = async ({ name, email, password }) => {
       .limit(1);
     if (existingUser.length > 0) {
       logger.error(`User with email ${email} already exists`);
-      throw new Error('User with this email already exists');
+      return null;
     }
 
     const token = crypto.randomUUID();
@@ -49,12 +49,15 @@ export const createUser = async ({ name, email, password }) => {
         id: users.id,
         name: users.name,
         email: users.email,
+        isVerified: users.isVerified,
+        verificationToken: users.verificationToken,
+        verificationTokenExpires: users.verificationTokenExpires,
       });
 
     return newUser;
   } catch (error) {
     logger.error('Error creating user:', error);
-    throw new Error('Error creating user: ' + error.message);
+    return null;
   }
 };
 
@@ -67,12 +70,12 @@ export const getUserByEmail = async email => {
       .limit(1);
     if (user.length === 0) {
       logger.error(`User with email ${email} not found`);
-      throw new Error('User not found');
+      return null;
     }
     return user[0];
   } catch (error) {
     logger.error('Error fetching user by email:', error);
-    throw new Error('Error fetching user by email: ' + error.message);
+    return null;
   }
 };
 
@@ -81,21 +84,25 @@ export const getUserById = async id => {
     const user = await db.select().from(users).where(eq(users.id, id)).limit(1);
     if (user.length === 0) {
       logger.error(`User with id ${id} not found`);
-      throw new Error('User not found');
+      return null;
     }
     return user[0];
   } catch (error) {
     logger.error('Error fetching user by id:', error);
-    throw new Error('Error fetching user by id: ' + error.message);
+    return null;
   }
 };
 
 export const signIn = async ({ email, password }) => {
   const user = await getUserByEmail(email);
+  if (!user) {
+    logger.error('User not found for email:', email);
+    return null;
+  }
   const isMatch = await comparePassword(password, user.password_hash);
   if (!isMatch) {
     logger.error('Invalid password for user with email:', email);
-    throw new Error('Invalid password');
+    return null;
   }
   return user;
 };

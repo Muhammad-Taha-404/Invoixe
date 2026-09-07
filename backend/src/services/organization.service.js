@@ -1,4 +1,4 @@
-import { db } from '../db.js';
+import { db } from '../config/database.js';
 import { organizations } from '../models/organizations.model.js';
 import { eq } from 'drizzle-orm';
 import logger from '#config/logger.js';
@@ -13,7 +13,7 @@ export const createOrg = async orgData => {
       .limit(1);
     if (existingOrg.length > 0) {
       logger.error(`Organization with slug ${slug} already exists`);
-      throw new Error('Organization with this slug already exists');
+      return null;
     } else {
       const newOrg = await db
         .insert(organizations)
@@ -22,7 +22,7 @@ export const createOrg = async orgData => {
     }
   } catch (error) {
     logger.error('Error creating organization:', error);
-    throw new Error('Error creating organization: ' + error.message);
+    return null;
   }
 };
 
@@ -32,7 +32,7 @@ export const getAllOrgs = async () => {
     return orgs;
   } catch (error) {
     logger.error('Error fetching organizations:', error);
-    throw new Error('Error fetching organizations: ' + error.message);
+    return null;
   }
 };
 
@@ -45,12 +45,12 @@ export const getOrgById = async id => {
       .limit(1);
     if (org.length === 0) {
       logger.error(`Organization with id ${id} not found`);
-      throw new Error('Organization not found');
+      return null;
     }
     return org[0];
   } catch (error) {
     logger.error('Error fetching organization by id:', error);
-    throw new Error('Error fetching organization by id: ' + error.message);
+    return null;
   }
 };
 
@@ -64,16 +64,18 @@ export const updateOrg = async (id, orgData) => {
       .limit(1);
     if (existingOrg.length === 0) {
       logger.error(`Organization with id ${id} not found`);
-      throw new Error('Organization not found');
+
+      return null;
     }
     await db
       .update(organizations)
       .set({ name, slug, industry })
       .where(eq(organizations.id, id));
-    return { message: 'Organization updated successfully' };
+    const updatedOrg = await getOrgById(id);
+    return updatedOrg;
   } catch (error) {
     logger.error('Error updating organization:', error);
-    throw new Error('Error updating organization: ' + error.message);
+    return { error: 'Error updating organization: ' + error.message };
   }
 };
 
@@ -82,12 +84,12 @@ export const deleteOrg = async id => {
     const [existingOrg] = await getOrgById(id);
     if (!existingOrg) {
       logger.error(`Organization with id ${id} not found`);
-      throw new Error('Organization not found');
+      return null;
     }
     await db.delete(organizations).where(eq(organizations.id, id));
-    return { message: 'Organization deleted successfully' };
+    return true;
   } catch (error) {
     logger.error('Error deleting organization:', error);
-    throw new Error('Error deleting organization: ' + error.message);
+    return null;
   }
 };
